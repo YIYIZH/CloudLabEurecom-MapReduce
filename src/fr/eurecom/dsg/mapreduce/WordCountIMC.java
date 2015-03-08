@@ -8,7 +8,7 @@ import java.util.StringTokenizer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -42,11 +42,11 @@ public class WordCountIMC extends Configured implements Tool {
         // TODO: set map class and the map output key and value classes
         job.setMapperClass(WCIMCMapper.class);
         job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(IntWritable.class);
+        job.setMapOutputValueClass(LongWritable.class);
         // TODO: set reduce class and the reduce output key and value classes
         job.setReducerClass(WCIMCReducer.class);
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(IntWritable.class);
+        job.setOutputValueClass(LongWritable.class);
         // TODO: set job output format
         job.setOutputFormatClass(TextOutputFormat.class);
         // TODO: add the input file as job input (from HDFS)
@@ -81,10 +81,10 @@ class WCIMCMapper extends Mapper<Object, // TODO: change Object to input key
         // type
         Text, // TODO: change Object to input value type
         Text, // TODO: change Object to output key type
-        IntWritable> { // TODO: change Object to output value type
+        LongWritable> { // TODO: change Object to output value type
 
     private Text _word = new Text();
-    private static final IntWritable _nWords = new IntWritable(0);
+    private static final LongWritable _nWords = new LongWritable(0);
 
     @Override
     protected void map(Object key, // TODO: change Object to input key type
@@ -113,20 +113,20 @@ class WCIMCMapper extends Mapper<Object, // TODO: change Object to input key
 
 class WCIMCReducer extends Reducer<Text, // TODO: change Object to input key
         // type
-        IntWritable, // TODO: change Object to input value type
+        LongWritable, // TODO: change Object to input value type
         Text, // TODO: change Object to output key type
-        IntWritable> { // TODO: change Object to output value type
+        LongWritable> { // TODO: change Object to output value type
 
-    private IntWritable _count = new IntWritable();
+    private LongWritable _count = new LongWritable();
 
     @Override
     protected void reduce(Text key, // TODO: change Object to input key type
-                          Iterable<IntWritable> values, // TODO: change Object to input value type
+                          Iterable<LongWritable> values, // TODO: change Object to input value type
                           Context context) throws IOException, InterruptedException {
 
         // TODO: implement the reduce method (use context.write to emit results)
         int count = 0;
-        for (IntWritable val : values){
+        for (LongWritable val : values){
             count += val.get();
         }
         _count.set(count);
