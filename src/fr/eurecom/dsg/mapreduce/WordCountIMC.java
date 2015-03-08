@@ -34,6 +34,8 @@ public class WordCountIMC extends Configured implements Tool {
     @Override
     public int run(String[] args) throws Exception {
         Configuration conf = this.getConf();
+        conf.set("mapreduce.job.jvm.numtasks", "-1"); // Turn on JVM reuse
+
         Job job = Job.getInstance(conf); // TODO: define new job instead of null using conf e setting
         // a name
 
@@ -86,6 +88,14 @@ class WCIMCMapper extends Mapper<Object, // TODO: change Object to input key
     private Text _word = new Text();
     private static final LongWritable _nWords = new LongWritable(0);
 
+    private HashMap<String, Integer> _pairs;
+
+    @Override
+    protected void setup(Context context
+    ) throws IOException, InterruptedException {
+        _pairs = new HashMap<String, Integer>();
+    }
+
     @Override
     protected void map(Object key, // TODO: change Object to input key type
                        Text value, // TODO: change Object to input value type
@@ -94,21 +104,23 @@ class WCIMCMapper extends Mapper<Object, // TODO: change Object to input key
         // * TODO: implement the map method (use context.write to emit results). Use
         // the in-memory combiner technique
         StringTokenizer stringTokenizer = new StringTokenizer(value.toString());
-        HashMap<String, Integer> pairs = new HashMap<String, Integer>();
 
-        while(stringTokenizer.hasMoreTokens()){
-            String w  = stringTokenizer.nextToken();
-            int count = pairs.containsKey(w)?pairs.get(w) + 1 : 1;
-            pairs.put(w, count);
+        while (stringTokenizer.hasMoreTokens()) {
+            String w = stringTokenizer.nextToken();
+            int count = _pairs.containsKey(w) ? _pairs.get(w) + 1 : 1;
+            _pairs.put(w, count);
         }
+    }
 
-        for (Map.Entry<String, Integer> entry : pairs.entrySet()) {
+    @Override
+    protected void cleanup(Context context
+    ) throws IOException, InterruptedException {
+        for (Map.Entry<String, Integer> entry : _pairs.entrySet()) {
             _word.set(entry.getKey());
             _nWords.set(entry.getValue());
             context.write(_word, _nWords);
         }
     }
-
 }
 
 class WCIMCReducer extends Reducer<Text, // TODO: change Object to input key
@@ -126,7 +138,7 @@ class WCIMCReducer extends Reducer<Text, // TODO: change Object to input key
 
         // TODO: implement the reduce method (use context.write to emit results)
         int count = 0;
-        for (LongWritable val : values){
+        for (LongWritable val : values) {
             count += val.get();
         }
         _count.set(count);
