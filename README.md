@@ -47,9 +47,22 @@ URL: https://github.com/michiard/CLOUDS-LAB
     Yes, because the operations sum are distributive
 
     ** Stripes **
-    +
-    +
+    + Can you use the implemented reducers as *Combiner*?
+    No, because the key input and key output of Reducer is different. The key output is word pair
 
+    + Do you think Stripes could be used with the in-memory combiner pattern?
+    Yes, we can
+
+    + How does the number of reducer influence the behavior of the Stripes approach?
+    Increasing #Reducers will:
+        * increase framework overhead (not good) (eg: network overhead)
+        * but increase the load balancing and lower the cost of failures (good)
+
+    + Using the Jobtracker Web Interface, compare the shuffle phase of *Pair* and *Stripes* design patterns.
+    Stripes has much less shuffle data than pair
+
+    + Why `StringToIntMapWritable` is not Comparable (differently from `TextPair`)?
+    We used StringToIntMapWritable to emit value, not the key. We didn't make any comparison or sort on the value
 
 3. Exercise 3: ** Order Inversion ** to solve words co-occurrence
 
