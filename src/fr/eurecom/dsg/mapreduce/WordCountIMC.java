@@ -88,12 +88,12 @@ class WCIMCMapper extends Mapper<Object, // TODO: change Object to input key
     private Text _word = new Text();
     private static final LongWritable _nWords = new LongWritable(0);
 
-    private HashMap<String, Integer> _pairs;
+    private HashMap<String, Long> _pairs;
 
     @Override
     protected void setup(Context context
     ) throws IOException, InterruptedException {
-        _pairs = new HashMap<String, Integer>();
+        _pairs = new HashMap<String, Long>();
     }
 
     @Override
@@ -107,7 +107,7 @@ class WCIMCMapper extends Mapper<Object, // TODO: change Object to input key
 
         while (stringTokenizer.hasMoreTokens()) {
             String w = stringTokenizer.nextToken();
-            int count = _pairs.containsKey(w) ? _pairs.get(w) + 1 : 1;
+            long count = _pairs.containsKey(w) ? _pairs.get(w) + 1 : 1;
             _pairs.put(w, count);
         }
     }
@@ -115,7 +115,7 @@ class WCIMCMapper extends Mapper<Object, // TODO: change Object to input key
     @Override
     protected void cleanup(Context context
     ) throws IOException, InterruptedException {
-        for (Map.Entry<String, Integer> entry : _pairs.entrySet()) {
+        for (Map.Entry<String, Long> entry : _pairs.entrySet()) {
             _word.set(entry.getKey());
             _nWords.set(entry.getValue());
             context.write(_word, _nWords);
@@ -137,7 +137,7 @@ class WCIMCReducer extends Reducer<Text, // TODO: change Object to input key
                           Context context) throws IOException, InterruptedException {
 
         // TODO: implement the reduce method (use context.write to emit results)
-        int count = 0;
+        long count = 0;
         for (LongWritable val : values) {
             count += val.get();
         }

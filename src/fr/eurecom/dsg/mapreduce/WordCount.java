@@ -113,7 +113,7 @@ class WCReducer extends Reducer<Text, // TODO: change Object to input key type
                           Context context) throws IOException, InterruptedException {
 
         // TODO: implement the reduce method (use context.write to emit results)
-        int count = 0;
+        long count = 0;
         for(LongWritable i :values){
             count += i.get();
         }
