@@ -64,8 +64,21 @@ URL: https://github.com/michiard/CLOUDS-LAB
     + Why `StringToIntMapWritable` is not Comparable (differently from `TextPair`)?
     We used StringToIntMapWritable to emit value, not the key. We didn't make any comparison or sort on the value
 
-3. Exercise 3: ** Order Inversion ** to solve words co-occurrence
+3. Exercise 3: ** Order Inversion ** to solve Relative term co-occurrence
+- Questions:
+Answer the following questions. In answering the questions below, consider the role of the combiner.
++ Do you think the Order Inversion approach is 'faster' than a naive approach with multiple jobs? For example, consider implementing a compound job in which you compute the numerator and the denominator separately, and then perform the computation of the relative frequency
+Yes
 
++ What is the impact of the use of a 'special' compound key on the amounts of shuffled bytes?
+Even increases the shuffled bytes if using without combiner. If we use combiner, the impact is not noticeable
+
++ How does the default partitioner works with `TextPair`? Can you imagine a different implementation that does not change the Partitioner?
+the default partitioner is HashPartitioner which hashes both 2 fields of the TextPair key.
+If we don't want to change partitioner => use stripes method
+
++ For each key, the reducer receives its marginal before the co-occurence with the other words. Why?
+Because of the sort phase: we sort on TextPair objects such that the objects with marginal have higher order than the ones without
 
 4. Exercise 4: Joins
     + ** Distributed Cache Join **
