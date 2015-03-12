@@ -12,19 +12,22 @@ URL: https://github.com/michiard/CLOUDS-LAB
     Increasing #Reducers will:
         * increase framework overhead (not good) (eg: network overhead)
         * but increase the load balancing and lower the cost of failures (good)
-
-    #Reducers can be executed in parallel depends on #CPU, #Cores in cluster
+    For general cases:
+    #Reducers can be executed in parallel depends on #CPU, #Cores in cluster, and also depends on #unique_key to be delivered to reducers
         #Tasks run in parallel per CPU = #Cores * #HW-threads per core (eg HyperThreading)
+
+
     + Use the JobTracker web interface to examine Job counters: can you explain the differences among the three variants of this exercise? For example, look at the amount of bytes shuffled by Hadoop
     In memory combiner:
         * Reduces #map output records due to the in-memory combiner technique -> somehow reduces #shuffle bytes
+        * Be careful with memory caching (manually), less overhead (materialization of output)
     Combiner:
-        * combines map output records significantly => significantly reduces #shuffle bytes
+        * combines map output records significantly => significantly reduces #shuffle bytes (reduce network traffic)
 
     + Zipf's law states that given some corpus of natural language utterances, the frequency of any word is inversely proportional to its rank in the frequency table. Thus the most frequent word will occur approximately twice as often as the second most frequent word, three times as often as the third most frequent word, etc. For example, in the *Brown Corpus of American English* text, the word "*the*" is the most frequently occurring word, and by itself accounts for nearly 7% of all word occurrences. The second-place word "*of*" accounts for slightly over 3.5% of words, followed by "*and*". Only 135 vocabulary items are needed to account for half the Brown Corpus. (wikipedia.org)
     Can you explain how does the distribution of words affect your Job?
     => input data is skewed
-    => imbalance load between reducers:
+    => imbalance load between reducers (straggler problem):
         * high load at reducers processing most frequent words => slower, finish later
         * low load at reducers processing lowest frequent words => faster, finish earlier, have to wait
     => overall, the performance decreases
@@ -39,6 +42,7 @@ URL: https://github.com/michiard/CLOUDS-LAB
     ** Pairs **
     + How does the number of reducer influence the behavior of the Pairs approach?
     Because the pair approach will emit a very large amount of intermediate values. If #reducer is small, reducers will be suffered from work load
+    The pair approach brings more parallelism, but also increases communication cost
 
     + Why does `TextPair` need to be Comparable?
     Because we have to group the intermediate values at reducer by key, which is a TextPair object
@@ -59,7 +63,7 @@ URL: https://github.com/michiard/CLOUDS-LAB
         * but increase the load balancing and lower the cost of failures (good)
 
     + Using the Jobtracker Web Interface, compare the shuffle phase of *Pair* and *Stripes* design patterns.
-    Stripes has much less shuffle data than pair
+    Stripes has much less shuffle data than pair (more compact)
 
     + Why `StringToIntMapWritable` is not Comparable (differently from `TextPair`)?
     We used StringToIntMapWritable to emit value, not the key. We didn't make any comparison or sort on the value
@@ -68,7 +72,7 @@ URL: https://github.com/michiard/CLOUDS-LAB
 - Questions:
 Answer the following questions. In answering the questions below, consider the role of the combiner.
 + Do you think the Order Inversion approach is 'faster' than a naive approach with multiple jobs? For example, consider implementing a compound job in which you compute the numerator and the denominator separately, and then perform the computation of the relative frequency
-Yes
+Yes, it's faster than chaining multiple jobs. It will cost a lot I/O disk to write intermediate output for the next jobs in the chain.
 
 + What is the impact of the use of a 'special' compound key on the amounts of shuffled bytes?
 Even increases the shuffled bytes if using without combiner. If we use combiner, the impact is not noticeable

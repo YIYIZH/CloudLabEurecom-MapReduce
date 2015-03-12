@@ -6,7 +6,7 @@ import java.util.StringTokenizer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -40,12 +40,12 @@ public class WordCount extends Configured implements Tool {
         // TODO: set map class and the map output key and value classes
         job.setMapperClass(WCMapper.class);
         job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(LongWritable.class);
+        job.setMapOutputValueClass(IntWritable.class);
 
         // TODO: set reduce class and the reduce output key and value classes
         job.setReducerClass(WCReducer.class);
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(LongWritable.class);
+        job.setOutputValueClass(IntWritable.class);
         // TODO: set job output format
         job.setOutputFormatClass(TextOutputFormat.class);
         // TODO: add the input file as job input (from HDFS) to the variable
@@ -81,10 +81,10 @@ public class WordCount extends Configured implements Tool {
 class WCMapper extends Mapper<Object, // TODO: change Object to input key type
         Text, // TODO: change Object to input value type
         Text, // TODO: change Object to output key type
-        LongWritable> { // TODO: change Object to output value type
+        IntWritable> { // TODO: change Object to output value type
 
     private Text _word = new Text();
-    private static final LongWritable _one = new LongWritable(1);
+    private static final IntWritable ONE = new IntWritable(1);
 
     @Override
     protected void map(Object key, // TODO: change Object to input key type
@@ -95,26 +95,26 @@ class WCMapper extends Mapper<Object, // TODO: change Object to input key type
         StringTokenizer stringTokenizer = new StringTokenizer(value.toString());
         while (stringTokenizer.hasMoreTokens()) {
             _word.set(stringTokenizer.nextToken());
-            context.write(_word, _one);
+            context.write(_word, ONE);
         }
     }
 
 }
 
 class WCReducer extends Reducer<Text, // TODO: change Object to input key type
-        LongWritable, // TODO: change Object to input value type
+        IntWritable, // TODO: change Object to input value type
         Text, // TODO: change Object to output key type
-        LongWritable> { // TODO: change Object to output value type
+        IntWritable> { // TODO: change Object to output value type
 
-    private LongWritable _count = new LongWritable(0);
+    private IntWritable _count = new IntWritable(0);
     @Override
     protected void reduce(Text key, // TODO: change Object to input key type
-                          Iterable<LongWritable> values, // TODO: change Object to input value type
+                          Iterable<IntWritable> values, // TODO: change Object to input value type
                           Context context) throws IOException, InterruptedException {
 
         // TODO: implement the reduce method (use context.write to emit results)
-        long count = 0;
-        for(LongWritable i :values){
+        int count = 0;
+        for(IntWritable i :values){
             count += i.get();
         }
         _count.set(count);
